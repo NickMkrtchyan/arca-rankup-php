@@ -1,0 +1,39 @@
+server {
+    listen 443 ssl http2;
+    server_name checkout.your-domain.com;
+
+    ssl_certificate     /etc/letsencrypt/live/checkout.your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/checkout.your-domain.com/privkey.pem;
+
+    root  /var/www/arca-rankup-php/public;
+    index index.php;
+
+    # Security headers
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header Strict-Transport-Security "max-age=63072000" always;
+
+    # Route everything to index.php
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include        fastcgi_params;
+        fastcgi_pass   unix:/run/php/php8.1-fpm.sock;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+    }
+
+    # Block access to sensitive files
+    location ~ /\.(env|git|htaccess) { deny all; }
+    location ^~ /src/   { deny all; }
+    location ^~ /cron/  { deny all; }
+    location ^~ /logs/  { deny all; }
+}
+
+server {
+    listen 80;
+    server_name checkout.your-domain.com;
+    return 301 https://$host$request_uri;
+}

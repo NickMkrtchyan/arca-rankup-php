@@ -1,0 +1,10 @@
+vendor/
+.env
+.env.local
+logs/
+*.log
+composer.lock
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

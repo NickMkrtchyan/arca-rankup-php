@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArCa Gateway PHP — Документация</title>
+<style>
+:root {
+  --sidebar-w: 272px;
+  --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --surface3: #2a2f47;
+  --border: #2e3248; --accent: #4f6ef7; --accent2: #7c3aed;
+  --green: #22c55e; --yellow: #eab308; --red: #ef4444;
+  --orange: #f97316; --cyan: #06b6d4; --pink: #ec4899; --violet: #8b5cf6;
+  --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
+  --code-bg: #141720; --radius: 10px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.7; display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ──────────────────────────────────────────────────────── */
+.sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); height: 100vh; position: sticky; top: 0; overflow-y: auto; display: flex; flex-direction: column; }
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.sidebar-header { padding: 22px 20px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 5; }
+.sidebar-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; color: var(--text); }
+.logo-badge { background: linear-gradient(135deg, var(--violet), var(--accent)); color: #fff; border-radius: 7px; padding: 4px 10px; font-size: 12px; font-weight: 800; }
+.logo-lang { background: var(--surface2); border: 1px solid var(--border); color: var(--cyan); border-radius: 5px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.sidebar-sub { font-size: 11px; color: var(--text3); margin-top: 5px; }
+.sidebar-nav { padding: 10px 0 24px; }
+.nav-group-label { padding: 14px 20px 5px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text3); }
+.nav-link { display: flex; align-items: center; gap: 9px; padding: 8px 20px; color: var(--text2); text-decoration: none; font-size: 13.5px; border-left: 3px solid transparent; transition: color .15s, background .15s, border-color .15s; cursor: pointer; }
+.nav-link:hover { color: var(--text); background: var(--surface2); }
+.nav-link.active { color: var(--violet); background: rgba(139,92,246,.08); border-left-color: var(--violet); font-weight: 600; }
+.nav-link .icon { font-size: 15px; min-width: 18px; text-align: center; }
+.nav-step { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--surface3); color: var(--text3); font-size: 10px; font-weight: 700; min-width: 18px; }
+.nav-link.active .nav-step { background: var(--violet); color: #fff; }
+
+/* ── CONTENT ──────────────────────────────────────────────────────── */
+.content { flex: 1; min-width: 0; max-width: 940px; padding: 48px 56px 80px; }
+@media (max-width: 1100px) { .content { padding: 32px 28px 60px; } }
+.doc-section { margin-bottom: 72px; scroll-margin-top: 24px; }
+.section-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--violet); margin-bottom: 8px; }
+h1 { font-size: 32px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+h2 { font-size: 23px; font-weight: 700; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+h3 { font-size: 16px; font-weight: 650; color: var(--text); margin: 24px 0 10px; }
+h4 { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .6px; margin: 18px 0 8px; }
+p { color: var(--text2); margin-bottom: 14px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--text); font-weight: 600; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+ul, ol { padding-left: 22px; color: var(--text2); margin-bottom: 14px; }
+li { margin-bottom: 6px; }
+
+/* ── CODE ──────────────────────────────────────────────────────────── */
+code { font-family: var(--mono); font-size: 13px; background: var(--surface2); color: var(--cyan); padding: 2px 6px; border-radius: 5px; border: 1px solid var(--border); }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; margin: 16px 0; }
+.pre-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 16px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .6px; }
+.pre-header .copy-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text3); padding: 2px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; font-family: var(--font); transition: color .15s; text-transform: none; letter-spacing: 0; }
+.pre-header .copy-btn:hover { color: var(--text); }
+pre code { display: block; padding: 16px 18px; font-size: 13px; line-height: 1.65; color: var(--text); background: none; border: none; border-radius: 0; white-space: pre; }
+.kw  { color: #c792ea; } .str { color: #c3e88d; } .cm  { color: #546e7a; font-style: italic; }
+.fn  { color: #82aaff; } .num { color: #f78c6c; } .cls { color: #ffcb6b; }
+.key { color: #f07178; } .val { color: #c3e88d; } .dim { color: #546e7a; }
+.attr { color: #89ddff; } .typ { color: #ffcb6b; }
+
+/* ── CALLOUTS ──────────────────────────────────────────────────────── */
+.callout { display: flex; gap: 13px; padding: 15px 18px; border-radius: var(--radius); border: 1px solid; margin: 20px 0; }
+.callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.callout-body p { margin: 0; font-size: 14px; }
+.callout-body strong { display: block; margin-bottom: 4px; font-size: 14px; }
+.callout.tip    { background: rgba(34,197,94,.07);  border-color: rgba(34,197,94,.25); }
+.callout.tip    .callout-icon { color: var(--green); }
+.callout.warn   { background: rgba(234,179,8,.07);  border-color: rgba(234,179,8,.25); }
+.callout.warn   .callout-icon { color: var(--yellow); }
+.callout.danger { background: rgba(239,68,68,.07);  border-color: rgba(239,68,68,.25); }
+.callout.danger .callout-icon { color: var(--red); }
+.callout.info   { background: rgba(79,110,247,.07); border-color: rgba(79,110,247,.25); }
+.callout.info   .callout-icon { color: var(--accent); }
+
+/* ── TABLES ────────────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; margin: 16px 0; border-radius: var(--radius); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+thead th { background: var(--surface2); padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text3); border-bottom: 1px solid var(--border); }
+tbody td { padding: 11px 16px; border-bottom: 1px solid var(--border); color: var(--text2); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--surface2); }
+
+/* ── HERO ──────────────────────────────────────────────────────────── */
+.hero { background: linear-gradient(135deg, rgba(139,92,246,.1), rgba(79,110,247,.06)); border: 1px solid var(--border); border-radius: 14px; padding: 36px; margin-bottom: 40px; }
+.hero-title { font-size: 12px; font-weight: 700; color: var(--violet); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.hero h1 { font-size: 28px; margin-bottom: 14px; }
+.hero p { color: var(--text2); font-size: 15px; margin-bottom: 20px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.hero-tag { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+
+/* ── ARCH DIAGRAM ──────────────────────────────────────────────────── */
+.arch { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
+.arch-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; flex: 1; min-width: 160px; }
+.arch-box .a-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text3); margin-bottom: 6px; }
+.arch-box .a-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.arch-box .a-desc { font-size: 12px; color: var(--text3); line-height: 1.4; }
+.arch-box.violet { border-color: rgba(139,92,246,.35); }
+.arch-box.cyan   { border-color: rgba(6,182,212,.35); }
+.arch-box.green  { border-color: rgba(34,197,94,.35); }
+.arch-box.orange { border-color: rgba(249,115,22,.35); }
+
+/* ── FLOW ──────────────────────────────────────────────────────────── */
+.flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 20px 0; }
+.flow-step { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.flow-arr { color: var(--text3); font-size: 18px; padding: 0 6px; }
+
+/* ── BADGES ────────────────────────────────────────────────────────── */
+.badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.b-php    { background: rgba(139,92,246,.15); color: var(--violet); }
+.b-alpine { background: rgba(6,182,212,.15);  color: var(--cyan); }
+.b-db     { background: rgba(34,197,94,.15);  color: var(--green); }
+.b-api    { background: rgba(249,115,22,.15); color: var(--orange); }
+.b-worker { background: rgba(234,179,8,.15);  color: var(--yellow); }
+.method-get    { background: rgba(34,197,94,.12);  color: var(--green);  border: 1px solid rgba(34,197,94,.3);  padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; font-family: var(--mono); }
+.method-post   { background: rgba(79,110,247,.12); color: #818cf8; border: 1px solid rgba(79,110,247,.3); padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; font-family: var(--mono); }
+
+/* ── ENV GRID ──────────────────────────────────────────────────────── */
+.env-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.env-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; }
+.env-key  { font-family: var(--mono); font-size: 12px; color: var(--cyan); margin-bottom: 3px; }
+.env-val  { font-size: 12px; color: var(--text3); }
+
+/* ── CHECKLIST ─────────────────────────────────────────────────────── */
+.checklist { list-style: none; padding: 0; }
+.checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-radius: 8px; margin-bottom: 6px; background: var(--surface); border: 1px solid var(--border); font-size: 14px; color: var(--text2); }
+.chk { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+
+/* ── COMPARE TABLE ─────────────────────────────────────────────────── */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+.compare-col { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.compare-col .c-header { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.compare-col .c-body { padding: 14px 16px; }
+.compare-col .c-body li { font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: relative; }
+  .content { padding: 24px 18px 48px; }
+  .env-grid, .compare-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══════════════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <span class="logo-badge">ArCa</span>
+      Gateway
+      <span class="logo-lang">PHP</span>
+    </div>
+    <div class="sidebar-sub">arca-rankup-php · 2026</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Обзор</div>
+    <a class="nav-link active" href="#intro"><span class="icon">🏠</span> Введение</a>
+    <a class="nav-link" href="#structure"><span class="icon">📁</span> Структура проекта</a>
+    <a class="nav-link" href="#flow"><span class="icon">🔄</span> Поток платежа</a>
+
+    <div class="nav-group-label">Конфигурация</div>
+    <a class="nav-link" href="#env"><span class="nav-step">1</span> Переменные (.env)</a>
+    <a class="nav-link" href="#config-php"><span class="nav-step">2</span> Config.php</a>
+    <a class="nav-link" href="#db-php"><span class="nav-step">3</span> DB.php + schema</a>
+
+    <div class="nav-group-label">Маршруты</div>
+    <a class="nav-link" href="#route-payment"><span class="nav-step">4</span> GET /pay</a>
+    <a class="nav-link" href="#route-result"><span class="nav-step">5</span> GET /result</a>
+    <a class="nav-link" href="#route-webhook"><span class="nav-step">6</span> POST /webhook/*</a>
+    <a class="nav-link" href="#route-api"><span class="nav-step">7</span> API + Health</a>
+
+    <div class="nav-group-label">Сервисы</div>
+    <a class="nav-link" href="#service-arca"><span class="nav-step">8</span> ArCa.php</a>
+    <a class="nav-link" href="#service-shopify"><span class="nav-step">9</span> Shopify.php</a>
+
+    <div class="nav-group-label">Воркеры</div>
+    <a class="nav-link" href="#worker-autopurge"><span class="nav-step">10</span> Autopurge</a>
+    <a class="nav-link" href="#worker-autocapture"><span class="nav-step">11</span> Autocapture</a>
+    <a class="nav-link" href="#cron"><span class="icon">⏰</span> Cron setup</a>
+
+    <div class="nav-group-label">Фронт</div>
+    <a class="nav-link" href="#dashboard"><span class="icon">📊</span> Alpine.js Dashboard</a>
+    <a class="nav-link" href="#result-page"><span class="icon">✅</span> Страница результата</a>
+
+    <div class="nav-group-label">Деплой</div>
+    <a class="nav-link" href="#deploy-nginx"><span class="icon">🌐</span> Nginx + PHP-FPM</a>
+    <a class="nav-link" href="#deploy-docker"><span class="icon">🐳</span> Docker</a>
+
+    <div class="nav-group-label">Справочник</div>
+    <a class="nav-link" href="#api-ref"><span class="icon">🔌</span> API Reference</a>
+    <a class="nav-link" href="#db-schema"><span class="icon">🗄️</span> Схема БД</a>
+    <a class="nav-link" href="#checklist"><span class="icon">✅</span> Чек-лист</a>
+  </nav>
+</aside>
+
+<!-- ═══ CONTENT ══════════════════════════════════════════════════════════════ -->
+<main class="content">
+
+<!-- ─── INTRO ──────────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="intro">
+  <div class="hero">
+    <div class="hero-title">PHP Edition · Документация</div>
+    <h1>ArCa Payment Gateway</h1>
+    <p>Middleware между Shopify и ArCa (ipay.arca.am). PHP 8.1 + Guzzle 7 + Alpine.js дашборд. Никаких фреймворков — только нативный PHP с PSR-4 автолоадом.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">PHP 8.1+</span>
+      <span class="hero-tag">Guzzle 7</span>
+      <span class="hero-tag">vlucas/phpdotenv</span>
+      <span class="hero-tag">PDO / MySQL 8</span>
+      <span class="hero-tag">Alpine.js 3</span>
+      <span class="hero-tag">Nginx + PHP-FPM</span>
+      <span class="hero-tag">Composer</span>
+    </div>
+  </div>
+
+  <h2>Архитектура</h2>
+  <div class="arch">
+    <div class="arch-box violet">
+      <div class="a-label">Routing</div>
+      <div class="a-name">public/index.php</div>
+      <div class="a-desc">Фронт-контроллер. <code>match()</code> по пути URL</div>
+    </div>
+    <div class="arch-box cyan">
+      <div class="a-label">Services</div>
+      <div class="a-name">ArCa.php / Shopify.php</div>
+      <div class="a-desc">Guzzle HTTP клиент, типизированные методы API</div>
+    </div>
+    <div class="arch-box green">
+      <div class="a-label">Persistence</div>
+      <div class="a-name">DB.php (PDO)</div>
+      <div class="a-desc">Singleton, prepared statements, helper-методы</div>
+    </div>
+    <div class="arch-box orange">
+      <div class="a-label">Workers</div>
+      <div class="a-name">cron/*.php</div>
+      <div class="a-desc">CLI скрипты, запускаются системным crontab</div>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body">
+      <strong>Отличие от Node.js версии</strong>
+      <p>PHP версия использует системный cron вместо <code>node-cron</code>, PHP-FPM вместо PM2, и Alpine.js вместо Vanilla JS для дашборда. Бизнес-логика идентична.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── STRUCTURE ──────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="structure">
+  <div class="section-eyebrow"><span class="badge b-php">PHP</span></div>
+  <h2>Структура проекта</h2>
+  <pre><div class="pre-header"><span>tree</span></div><code>arca-rankup-php/
+<span class="dim">├──</span> <span class="cls">public/</span>
+<span class="dim">│   ├──</span> index.php            <span class="cm">← точка входа (Nginx: root)</span>
+<span class="dim">│   └──</span> .htaccess            <span class="cm">← Apache rewrite (опционально)</span>
+<span class="dim">├──</span> <span class="cls">src/</span>
+<span class="dim">│   ├──</span> Config.php           <span class="cm">← типизированный доступ к .env</span>
+<span class="dim">│   ├──</span> DB.php               <span class="cm">← PDO singleton + helpers</span>
+<span class="dim">│   ├──</span> Logger.php           <span class="cm">← файловый логгер по каналам</span>
+<span class="dim">│   ├──</span> <span class="cls">Routes/</span>
+<span class="dim">│   │   ├──</span> Payment.php      <span class="cm">← GET /pay</span>
+<span class="dim">│   │   ├──</span> Result.php       <span class="cm">← GET /result</span>
+<span class="dim">│   │   ├──</span> Webhook.php      <span class="cm">← POST /webhook/cancel|capture</span>
+<span class="dim">│   │   └──</span> Api.php          <span class="cm">← /api/stats, /api/config, /health</span>
+<span class="dim">│   ├──</span> <span class="cls">Services/</span>
+<span class="dim">│   │   ├──</span> ArCa.php         <span class="cm">← register/status/deposit/reverse/refund</span>
+<span class="dim">│   │   └──</span> Shopify.php      <span class="cm">← getOrder/createTransaction/verifyWebhook</span>
+<span class="dim">│   └──</span> <span class="cls">Workers/</span>
+<span class="dim">│       ├──</span> Autopurge.php    <span class="cm">← отмена зависших заказов</span>
+<span class="dim">│       └──</span> Autocapture.php  <span class="cm">← повтор неудачных deposit.do</span>
+<span class="dim">├──</span> <span class="cls">cron/</span>
+<span class="dim">│   ├──</span> autopurge.php        <span class="cm">← CLI entrypoint для autopurge</span>
+<span class="dim">│   └──</span> autocapture.php      <span class="cm">← CLI entrypoint для autocapture</span>
+<span class="dim">├──</span> <span class="cls">templates/</span>
+<span class="dim">│   ├──</span> dashboard.php        <span class="cm">← Alpine.js dashboard</span>
+<span class="dim">│   └──</span> result.php           <span class="cm">← страница результата оплаты</span>
+<span class="dim">├──</span> <span class="cls">db/</span>
+<span class="dim">│   └──</span> schema.sql
+<span class="dim">├──</span> composer.json
+<span class="dim">├──</span> nginx.conf.example
+<span class="dim">├──</span> .env.example
+<span class="dim">└──</span> .gitignore</code></pre>
+
+  <h3>Пространство имён</h3>
+  <p>PSR-4 автолоад через Composer. Все классы в <code>src/</code> имеют namespace <code>ArCa\*</code>:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Класс</th><th>Namespace</th></tr></thead>
+      <tbody>
+        <tr><td><code>Config</code></td><td><code>ArCa\Config</code></td></tr>
+        <tr><td><code>DB</code></td><td><code>ArCa\DB</code></td></tr>
+        <tr><td><code>Logger</code></td><td><code>ArCa\Logger</code></td></tr>
+        <tr><td><code>Payment</code></td><td><code>ArCa\Routes\Payment</code></td></tr>
+        <tr><td><code>ArCa</code> (сервис)</td><td><code>ArCa\Services\ArCa</code></td></tr>
+        <tr><td><code>Shopify</code> (сервис)</td><td><code>ArCa\Services\Shopify</code></td></tr>
+        <tr><td><code>Autopurge</code></td><td><code>ArCa\Workers\Autopurge</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── FLOW ───────────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="flow">
+  <div class="section-eyebrow">Архитектура</div>
+  <h2>Поток платежа (PreAuth mode)</h2>
+  <div class="flow">
+    <span class="flow-step">🛒 Shopify Cart</span><span class="flow-arr">→</span>
+    <span class="flow-step">GET /pay?orderid=</span><span class="flow-arr">→</span>
+    <span class="flow-step">registerPreAuth.do</span><span class="flow-arr">→</span>
+    <span class="flow-step">ArCa Form</span><span class="flow-arr">→</span>
+    <span class="flow-step">GET /result</span><span class="flow-arr">→</span>
+    <span class="flow-step">Shopify Transaction</span>
+  </div>
+  <div class="flow" style="margin-top: 10px">
+    <span class="flow-step">Shopify Mark Paid</span><span class="flow-arr">→</span>
+    <span class="flow-step">POST /webhook/capture</span><span class="flow-arr">→</span>
+    <span class="flow-step">deposit.do</span><span class="flow-arr">→</span>
+    <span class="flow-step">✅ Captured</span>
+  </div>
+
+  <h3>Sale mode (без PreAuth)</h3>
+  <p>При <code>ARCA_AUTH_MODE=0</code> используется <code>register.do</code> вместо <code>registerPreAuth.do</code> — деньги списываются сразу, шаг capture не нужен.</p>
+</section>
+
+<!-- ─── ENV ────────────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="env">
+  <div class="section-eyebrow"><span class="badge b-php">Config</span> &nbsp;Шаг 1</div>
+  <h2>Переменные окружения (.env)</h2>
+  <p>Скопируйте <code>.env.example</code> в <code>.env</code> и заполните значения:</p>
+  <pre><div class="pre-header"><span>.env</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>APP_ENV=production
+APP_URL=https://checkout.your-domain.com
+
+<span class="cm"># MySQL</span>
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=arca_gateway
+DB_USER=arca
+DB_PASSWORD=StrongPassword123!
+DB_ROOT_PASSWORD=RootPassword456!   <span class="cm"># только для Docker</span>
+
+<span class="cm"># Shopify Custom App</span>
+SHOPIFY_STORE=your-store.myshopify.com
+SHOPIFY_ACCESS_TOKEN=shpat_xxxxxxxxxxxxxxxxxxxx
+SHOPIFY_WEBHOOK_SECRET=your_webhook_secret
+SHOPIFY_API_VERSION=2024-01
+
+<span class="cm"># ArCa — выдаётся банком</span>
+ARCA_USERNAME=your_arca_username
+ARCA_PASSWORD=your_arca_password
+ARCA_BASE_URL=https://ipay.arca.am/payment/rest
+ARCA_AUTH_MODE=1   <span class="cm"># 1=PreAuth, 0=Sale</span>
+
+<span class="cm"># Курсы валют</span>
+DEFAULT_CURRENCY=AMD
+DEFAULT_CURRENCY_CODE=051
+SHOP_CURRENCY=EUR
+EUR_RATE=430
+USD_RATE=420
+
+CANCEL_AFTER_MINUTES=30</code></pre>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Переменная</th><th>Описание</th><th>Обязательна</th></tr></thead>
+      <tbody>
+        <tr><td><code>ARCA_AUTH_MODE</code></td><td><code>1</code> = PreAuth + отдельный capture; <code>0</code> = Sale, списание сразу</td><td>✅</td></tr>
+        <tr><td><code>ARCA_BASE_URL</code></td><td>Тест: <code>https://ipaytest.arca.am:8445/payment/rest</code></td><td>✅</td></tr>
+        <tr><td><code>SHOPIFY_WEBHOOK_SECRET</code></td><td>Для HMAC-верификации входящих вебхуков</td><td>✅</td></tr>
+        <tr><td><code>EUR_RATE / USD_RATE</code></td><td>Курс для конвертации суммы заказа в AMD</td><td>✅</td></tr>
+        <tr><td><code>CANCEL_AFTER_MINUTES</code></td><td>Через сколько минут autopurge отменяет зависший заказ</td><td>✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── CONFIG.PHP ──────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="config-php">
+  <div class="section-eyebrow"><span class="badge b-php">PHP</span> &nbsp;Шаг 2</div>
+  <h2>Config.php — доступ к конфигурации</h2>
+  <p><code>Config</code> читает переменные из <code>$_ENV</code> / <code>getenv()</code> и предоставляет типизированные группы:</p>
+  <pre><div class="pre-header"><span>php — использование в коде</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code><span class="cm">// Получить одно значение</span>
+Config::get(<span class="str">'APP_URL'</span>);
+Config::get(<span class="str">'EUR_RATE'</span>, <span class="num">430</span>);  <span class="cm">// с дефолтом</span>
+Config::require(<span class="str">'ARCA_PASSWORD'</span>);   <span class="cm">// бросает RuntimeException если пусто</span>
+
+<span class="cm">// Группированные аксессоры</span>
+$arca    = Config::arca();     <span class="cm">// username, password, base_url, auth_mode</span>
+$shopify = Config::shopify();  <span class="cm">// store, access_token, webhook_secret, api_version</span>
+$db      = Config::db();       <span class="cm">// host, port, name, user, password</span>
+$cur     = Config::currency(); <span class="cm">// default, default_code, shop_currency, eur_rate, usd_rate</span>
+$app     = Config::app();      <span class="cm">// env, url, cancel_after_minutes</span></code></pre>
+</section>
+
+<!-- ─── DB.PHP ─────────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="db-php">
+  <div class="section-eyebrow"><span class="badge b-db">Database</span> &nbsp;Шаг 3</div>
+  <h2>DB.php — PDO Singleton</h2>
+  <p><code>DB::pdo()</code> создаёт одно соединение на весь запрос (singleton pattern).</p>
+  <pre><div class="pre-header"><span>php — примеры запросов</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code><span class="cm">// SELECT — один ряд</span>
+$tx = DB::fetch(
+    <span class="str">'SELECT * FROM transaction WHERE externaltrid = ? LIMIT 1'</span>,
+    [$arcaOrderId]
+);
+
+<span class="cm">// SELECT — все ряды</span>
+$rows = DB::fetchAll(
+    <span class="str">'SELECT * FROM orders WHERE status = ? ORDER BY id DESC'</span>,
+    [<span class="num">0</span>]
+);
+
+<span class="cm">// INSERT — возвращает lastInsertId</span>
+$id = DB::insert(<span class="str">'orders'</span>, [
+    <span class="str">'status'</span>  => <span class="num">0</span>,
+    <span class="str">'orderid'</span> => <span class="str">'12345'</span>,
+    <span class="str">'price'</span>   => <span class="num">43000.00</span>,
+]);
+
+<span class="cm">// UPDATE</span>
+DB::update(<span class="str">'transaction'</span>,
+    [<span class="str">'trstatus'</span> => <span class="str">'captured'</span>],
+    <span class="str">'externaltrid = ?'</span>,
+    [$arcaOrderId]
+);</code></pre>
+
+  <h3>Инициализация БД</h3>
+  <pre><div class="pre-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>mysql -u root -p &lt; db/schema.sql</code></pre>
+</section>
+
+<!-- ─── ROUTE: PAYMENT ──────────────────────────────────────────────────────── -->
+<section class="doc-section" id="route-payment">
+  <div class="section-eyebrow"><span class="badge b-api">Route</span> &nbsp;Шаг 4</div>
+  <h2>GET /pay — инициализация платежа</h2>
+  <p>Файл: <code>src/Routes/Payment.php</code></p>
+
+  <h3>Query параметры</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Параметр</th><th>Тип</th><th>Обязателен</th><th>Описание</th></tr></thead>
+      <tbody>
+        <tr><td><code>orderid</code></td><td>integer</td><td>✅</td><td>Shopify Order ID</td></tr>
+        <tr><td><code>lang</code></td><td>string</td><td>—</td><td>Язык формы ArCa (<code>en</code>, <code>ru</code>, <code>hy</code>)</td></tr>
+        <tr><td><code>statusurl</code></td><td>URL</td><td>—</td><td>Куда вернуть покупателя после результата</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Что происходит внутри</h3>
+  <ol>
+    <li>Валидация <code>orderid</code> (только цифры)</li>
+    <li><code>Shopify::getOrder()</code> — получение данных заказа</li>
+    <li>Конвертация суммы в AMD × 100 (копейки для ArCa)</li>
+    <li><code>DB::insert('orders', ...)</code> — сохранение</li>
+    <li><code>ArCa::register()</code> → получаем <code>orderId</code> (UUID) и <code>formUrl</code></li>
+    <li><code>DB::insert('transaction', ...)</code></li>
+    <li><code>header("Location: {$formUrl}")</code> — редирект на форму ArCa</li>
+  </ol>
+
+  <pre><div class="pre-header"><span>php — конвертация валюты</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>$amdAmount = <span class="kw">match</span>($shopCurrency) {
+    <span class="str">'EUR'</span>    => $rawAmount * $cfg[<span class="str">'eur_rate'</span>],
+    <span class="str">'USD'</span>    => $rawAmount * $cfg[<span class="str">'usd_rate'</span>],
+    <span class="kw">default</span>  => $rawAmount,
+};
+$amountKopeks = (int) round($amdAmount * <span class="num">100</span>);</code></pre>
+</section>
+
+<!-- ─── ROUTE: RESULT ───────────────────────────────────────────────────────── -->
+<section class="doc-section" id="route-result">
+  <div class="section-eyebrow"><span class="badge b-api">Route</span> &nbsp;Шаг 5</div>
+  <h2>GET /result — обработка ответа ArCa</h2>
+  <p>Файл: <code>src/Routes/Result.php</code></p>
+  <p>ArCa редиректит покупателя сюда после заполнения карточных данных. Эндпоинт вызывает <code>getOrderStatusExtended.do</code> и принимает решение по <code>paymentState</code>:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>paymentState</th><th>Действие</th><th>Shopify transaction</th></tr></thead>
+      <tbody>
+        <tr><td><code>APPROVED</code></td><td>Статус → <code>authorized</code></td><td><code>kind=authorization, status=success</code></td></tr>
+        <tr><td><code>DEPOSITED</code></td><td>Статус → <code>captured</code></td><td><code>kind=sale, status=success</code></td></tr>
+        <tr><td><code>DECLINED</code></td><td>Статус → <code>declined</code></td><td><code>kind=authorization, status=failure</code></td></tr>
+        <tr><td>other</td><td>Статус → <code>pending</code></td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Дополнительно сохраняет данные карты (PAN masked, holder, approvalCode) в таблицу <code>transaction_details</code>.</p>
+</section>
+
+<!-- ─── ROUTE: WEBHOOK ──────────────────────────────────────────────────────── -->
+<section class="doc-section" id="route-webhook">
+  <div class="section-eyebrow"><span class="badge b-api">Route</span> &nbsp;Шаг 6</div>
+  <h2>POST /webhook/* — Shopify Events</h2>
+  <p>Файл: <code>src/Routes/Webhook.php</code></p>
+
+  <div class="callout danger">
+    <span class="callout-icon">🔐</span>
+    <div class="callout-body">
+      <strong>HMAC Верификация обязательна</strong>
+      <p>Каждый webhook проверяется через <code>hash_equals(base64(hmac_sha256(body, secret)), header)</code> до выполнения любых действий. При несовпадении — <code>401</code>.</p>
+    </div>
+  </div>
+
+  <h3>POST /webhook/cancel</h3>
+  <p>Принимает топики <code>orders/cancelled</code> и <code>refunds/create</code>.</p>
+  <ul>
+    <li>Если транзакция в статусе <code>authorized</code> → вызывает <code>reverse.do</code></li>
+    <li>Если <code>refunds/create</code> → вызывает <code>refund.do</code> с суммой рефанда</li>
+  </ul>
+
+  <h3>POST /webhook/capture</h3>
+  <p>Принимает топик <code>orders/paid</code>. Если транзакция <code>authorized</code> → вызывает <code>deposit.do</code>. При неудаче — добавляет задание в таблицу <code>process</code> для <code>Autocapture</code>.</p>
+
+  <div class="callout tip">
+    <span class="callout-icon">⚡</span>
+    <div class="callout-body">
+      <strong>fastcgi_finish_request()</strong>
+      <p>После отправки <code>200 ok</code> вызывается <code>fastcgi_finish_request()</code> — PHP-FPM закрывает соединение с Shopify немедленно, а тяжёлая работа (ArCa API вызов) продолжается в фоне.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ROUTE: API ──────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="route-api">
+  <div class="section-eyebrow"><span class="badge b-api">Route</span> &nbsp;Шаг 7</div>
+  <h2>API эндпоинты</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>URL</th><th>Метод</th><th>Описание</th></tr></thead>
+      <tbody>
+        <tr><td><code>/api/stats</code></td><td><span class="method-get">GET</span></td><td>Статистика заказов и последние 20 транзакций</td></tr>
+        <tr><td><code>/api/config</code></td><td><span class="method-get">GET</span></td><td>Конфигурация (режим, магазин, валюта)</td></tr>
+        <tr><td><code>/health</code></td><td><span class="method-get">GET</span></td><td>Healthcheck для мониторинга</td></tr>
+        <tr><td><code>/</code></td><td><span class="method-get">GET</span></td><td>Alpine.js Dashboard</td></tr>
+        <tr><td><code>/pay</code></td><td><span class="method-get">GET</span></td><td>Инициализация платежа</td></tr>
+        <tr><td><code>/result</code></td><td><span class="method-get">GET</span></td><td>Коллбэк от ArCa</td></tr>
+        <tr><td><code>/webhook/cancel</code></td><td><span class="method-post">POST</span></td><td>orders/cancelled + refunds/create</td></tr>
+        <tr><td><code>/webhook/capture</code></td><td><span class="method-post">POST</span></td><td>orders/paid → deposit.do</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Пример ответа /health</h3>
+  <pre><div class="pre-header"><span>json</span></div><code>{ <span class="key">"status"</span>: <span class="val">"ok"</span>, <span class="key">"ts"</span>: <span class="val">"2026-04-05T18:30:00+04:00"</span>, <span class="key">"env"</span>: <span class="val">"production"</span> }</code></pre>
+
+  <h3>Пример ответа /api/stats</h3>
+  <pre><div class="pre-header"><span>json</span></div><code>{
+  <span class="key">"totals"</span>: { <span class="key">"total"</span>: <span class="num">42</span>, <span class="key">"pending"</span>: <span class="num">3</span>, <span class="key">"captured"</span>: <span class="num">36</span>, <span class="key">"expired"</span>: <span class="num">3</span> },
+  <span class="key">"revenue"</span>: { <span class="key">"total_amd"</span>: <span class="num">18634000</span> },
+  <span class="key">"recent"</span>: [
+    { <span class="key">"externaltrid"</span>: <span class="val">"a1b2c3d4-..."</span>, <span class="key">"trstatus"</span>: <span class="val">"captured"</span>, <span class="key">"price"</span>: <span class="num">43000</span>, ... }
+  ]
+}</code></pre>
+</section>
+
+<!-- ─── SERVICE: ARCA ───────────────────────────────────────────────────────── -->
+<section class="doc-section" id="service-arca">
+  <div class="section-eyebrow"><span class="badge b-api">Service</span> &nbsp;Шаг 8</div>
+  <h2>ArCa.php — методы API</h2>
+  <p>Файл: <code>src/Services/ArCa.php</code>. Использует Guzzle HTTP клиент для всех вызовов.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Метод PHP</th><th>ArCa endpoint</th><th>Когда вызывается</th></tr></thead>
+      <tbody>
+        <tr><td><code>register()</code></td><td><code>register.do</code> / <code>registerPreAuth.do</code></td><td>GET /pay — инициализация</td></tr>
+        <tr><td><code>getStatus()</code></td><td><code>getOrderStatusExtended.do</code></td><td>GET /result, webhook/capture</td></tr>
+        <tr><td><code>deposit()</code></td><td><code>deposit.do</code></td><td>webhook/capture — списание</td></tr>
+        <tr><td><code>reverse()</code></td><td><code>reverse.do</code></td><td>webhook/cancel — отмена authorized</td></tr>
+        <tr><td><code>refund()</code></td><td><code>refund.do</code></td><td>webhook/cancel — возврат captured</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><div class="pre-header"><span>php — пример вызова register()</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>$arca = <span class="kw">new</span> ArCa\Services\ArCa();
+$result = $arca->register(
+    orderNumber:  <span class="str">'42'</span>,
+    amountKopeks: <span class="num">4300000</span>,   <span class="cm">// 43 000 AMD × 100</span>
+    returnUrl:    <span class="str">'https://checkout.your-domain.com/result'</span>,
+    lang:         <span class="str">'en'</span>,
+    description:  <span class="str">'Shopify Order #1001'</span>,
+    email:        <span class="str">'customer@example.com'</span>
+);
+<span class="cm">// $result['orderId']  — UUID для дальнейших операций</span>
+<span class="cm">// $result['formUrl']  — URL формы ArCa для редиректа</span></code></pre>
+
+  <h3>Коды ошибок ArCa</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>errorCode</th><th>Значение</th></tr></thead>
+      <tbody>
+        <tr><td><code>0</code></td><td>Успех</td></tr>
+        <tr><td><code>5</code></td><td>Access denied — неверный username/password</td></tr>
+        <tr><td><code>6</code></td><td>Order not found — UUID не существует</td></tr>
+        <tr><td><code>7</code></td><td>System error — внутренняя ошибка шлюза</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── SERVICE: SHOPIFY ────────────────────────────────────────────────────── -->
+<section class="doc-section" id="service-shopify">
+  <div class="section-eyebrow"><span class="badge b-api">Service</span> &nbsp;Шаг 9</div>
+  <h2>Shopify.php — методы API</h2>
+  <p>Файл: <code>src/Services/Shopify.php</code>. Guzzle с <code>base_uri</code> и <code>X-Shopify-Access-Token</code> header.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Метод PHP</th><th>Shopify REST</th><th>Когда</th></tr></thead>
+      <tbody>
+        <tr><td><code>getOrder(id)</code></td><td><code>GET /orders/{id}.json</code></td><td>/pay — получение суммы, email</td></tr>
+        <tr><td><code>createTransaction()</code></td><td><code>POST /orders/{id}/transactions.json</code></td><td>/result — фиксация статуса оплаты</td></tr>
+        <tr><td><code>cancelOrder(id)</code></td><td><code>POST /orders/{id}/cancel.json</code></td><td>webhook/cancel, autopurge</td></tr>
+        <tr><td><code>deleteOrder(id)</code></td><td><code>DELETE /orders/{id}.json</code></td><td>autopurge</td></tr>
+        <tr><td><code>verifyWebhook(body, hmac)</code></td><td>—</td><td>Каждый POST /webhook/*</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><div class="pre-header"><span>php — HMAC верификация</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>$rawBody = file_get_contents(<span class="str">'php://input'</span>);
+$hmac    = $_SERVER[<span class="str">'HTTP_X_SHOPIFY_HMAC_SHA256'</span>] ?? <span class="str">''</span>;
+
+<span class="kw">if</span> (!(new Shopify())->verifyWebhook($rawBody, $hmac)) {
+    http_response_code(<span class="num">401</span>);
+    <span class="kw">return</span>;
+}</code></pre>
+</section>
+
+<!-- ─── WORKER: AUTOPURGE ───────────────────────────────────────────────────── -->
+<section class="doc-section" id="worker-autopurge">
+  <div class="section-eyebrow"><span class="badge b-worker">Worker</span> &nbsp;Шаг 10</div>
+  <h2>Autopurge — отмена зависших заказов</h2>
+  <p>Файл: <code>src/Workers/Autopurge.php</code></p>
+  <p>Находит заказы со статусом <code>status=0</code> (pending) и транзакцией <code>trstatus=pending</code>, которые старше <code>CANCEL_AFTER_MINUTES</code> минут:</p>
+  <ol>
+    <li>Обновляет <code>transaction.trstatus = 'deleted'</code></li>
+    <li>Обновляет <code>orders.status = 4</code></li>
+    <li>Вызывает <code>Shopify::cancelOrder()</code></li>
+    <li>Вызывает <code>Shopify::deleteOrder()</code></li>
+  </ol>
+  <pre><div class="pre-header"><span>bash — запуск вручную</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>php /var/www/arca-rankup-php/cron/autopurge.php</code></pre>
+</section>
+
+<!-- ─── WORKER: AUTOCAPTURE ─────────────────────────────────────────────────── -->
+<section class="doc-section" id="worker-autocapture">
+  <div class="section-eyebrow"><span class="badge b-worker">Worker</span> &nbsp;Шаг 11</div>
+  <h2>Autocapture — повтор deposit.do</h2>
+  <p>Файл: <code>src/Workers/Autocapture.php</code></p>
+  <p>Обрабатывает таблицу <code>process</code> — задания, где первый <code>deposit.do</code> не прошёл. До 10 попыток (<code>MAX_RETRIES</code>):</p>
+  <ul>
+    <li>Вызывает <code>ArCa::getStatus()</code> — если уже <code>DEPOSITED</code>, просто обновляет статус</li>
+    <li>Если <code>APPROVED</code> → вызывает <code>deposit.do</code></li>
+    <li>При успехе — удаляет запись из <code>process</code></li>
+    <li>При неудаче — увеличивает <code>retry</code></li>
+  </ul>
+  <pre><div class="pre-header"><span>bash — запуск вручную</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>php /var/www/arca-rankup-php/cron/autocapture.php</code></pre>
+</section>
+
+<!-- ─── CRON ───────────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="cron">
+  <div class="section-eyebrow"><span class="badge b-worker">Cron</span></div>
+  <h2>Настройка Cron</h2>
+  <p>В отличие от Node.js версии, здесь нет встроенного планировщика — используется системный <code>crontab</code>:</p>
+  <pre><div class="pre-header"><span>bash — crontab -e</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code><span class="cm"># Autopurge — каждые 5 минут</span>
+*/5 * * * * php /var/www/arca-rankup-php/cron/autopurge.php  >> /var/log/arca-cron.log 2>&1
+
+<span class="cm"># Autocapture — каждые 2 минуты</span>
+*/2 * * * * php /var/www/arca-rankup-php/cron/autocapture.php >> /var/log/arca-cron.log 2>&1</code></pre>
+
+  <div class="callout warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body">
+      <strong>PHP Binary Path</strong>
+      <p>Убедитесь что используете правильный бинарник: <code>which php</code> или явно <code>/usr/bin/php8.1</code>. На серверах с несколькими версиями PHP <code>php</code> по умолчанию может быть 7.x.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DASHBOARD ──────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="dashboard">
+  <div class="section-eyebrow"><span class="badge b-alpine">Alpine.js</span></div>
+  <h2>Alpine.js Dashboard</h2>
+  <p>Файл: <code>templates/dashboard.php</code>. Загружается по адресу <code>/</code>.</p>
+
+  <h3>Возможности</h3>
+  <ul>
+    <li>Авто-рефреш каждые <strong>30 секунд</strong> (<code>setInterval</code>)</li>
+    <li>Фильтрация по статусу: captured / authorized / pending / declined / canceled</li>
+    <li>Пагинация по 15 транзакций на странице</li>
+    <li>Skeleton-лоадер при первой загрузке</li>
+    <li>Форматирование суммы в армянских драмах (<code>֏</code>)</li>
+  </ul>
+
+  <h3>Alpine.js компонент</h3>
+  <pre><div class="pre-header"><span>javascript — dashboard()</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code><span class="kw">function</span> <span class="fn">dashboard</span>() {
+  <span class="kw">return</span> {
+    stats: {},
+    cfg: <span class="kw">null</span>,
+    loading: <span class="kw">false</span>,
+    filterStatus: <span class="str">''</span>,
+    page: <span class="num">1</span>,
+    pageSize: <span class="num">15</span>,
+
+    <span class="kw">get</span> filtered() { <span class="cm">/* computed */</span> },
+    <span class="kw">get</span> displayed() { <span class="cm">/* pagination slice */</span> },
+
+    <span class="kw">async</span> <span class="fn">init</span>()    { <span class="kw">await</span> this.refresh(); setInterval(() => this.refresh(), <span class="num">30000</span>); },
+    <span class="kw">async</span> <span class="fn">refresh</span>() { <span class="cm">/* fetch /api/stats + /api/config */</span> },
+    <span class="fn">formatAMD</span>(v)   { <span class="cm">/* Intl.NumberFormat для ֏ */</span> },
+    <span class="fn">formatDate</span>(dt)  { <span class="cm">/* toLocaleString */</span> },
+  };
+}</code></pre>
+
+  <p>Alpine.js подключается через CDN — никакой сборки не нужно:</p>
+  <pre><div class="pre-header"><span>html</span></div><code>&lt;script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"&gt;&lt;/script&gt;</code></pre>
+</section>
+
+<!-- ─── RESULT PAGE ─────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="result-page">
+  <div class="section-eyebrow">Шаблоны</div>
+  <h2>Страница результата</h2>
+  <p>Файл: <code>templates/result.php</code>. Рендерится через <code>require</code> из <code>Routes\Result::renderResult()</code>. Переменные, доступные в шаблоне:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Переменная</th><th>Значения</th><th>Описание</th></tr></thead>
+      <tbody>
+        <tr><td><code>$type</code></td><td><code>success</code>, <code>declined</code>, <code>pending</code>, <code>error</code></td><td>Тип результата</td></tr>
+        <tr><td><code>$message</code></td><td>string</td><td>Сообщение для покупателя</td></tr>
+        <tr><td><code>$statusUrl</code></td><td>string|null</td><td>Ссылка «View Order» в Shopify</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>При <code>success</code> + <code>$statusUrl</code> — автоматический редирект через 8 секунд с обратным отсчётом.</p>
+</section>
+
+<!-- ─── DEPLOY NGINX ────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="deploy-nginx">
+  <div class="section-eyebrow">Деплой</div>
+  <h2>Nginx + PHP-FPM</h2>
+
+  <h3>Установка PHP 8.1 + расширения</h3>
+  <pre><div class="pre-header"><span>bash — Ubuntu 22.04</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>sudo add-apt-repository ppa:ondrej/php -y
+sudo apt update
+sudo apt install -y php8.1 php8.1-fpm php8.1-mysql php8.1-curl \
+                   php8.1-mbstring php8.1-xml php8.1-zip
+
+<span class="cm"># Проверка</span>
+php8.1 -v
+systemctl status php8.1-fpm</code></pre>
+
+  <h3>Nginx конфигурация</h3>
+  <pre><div class="pre-header"><span>/etc/nginx/sites-available/arca-gateway</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>server {
+    listen 443 ssl http2;
+    server_name checkout.your-domain.com;
+
+    ssl_certificate     /etc/letsencrypt/live/checkout.your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/checkout.your-domain.com/privkey.pem;
+
+    root  /var/www/arca-rankup-php/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include        fastcgi_params;
+        fastcgi_pass   unix:/run/php/php8.1-fpm.sock;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+    }
+
+    <span class="cm"># Запрет доступа к исходникам</span>
+    location ~ /\.(env|git) { deny all; }
+    location ^~ /src/       { deny all; }
+    location ^~ /cron/      { deny all; }
+    location ^~ /logs/      { deny all; }
+}</code></pre>
+
+  <h3>Деплой на сервер</h3>
+  <pre><div class="pre-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>cd /var/www
+git clone https://github.com/YOUR_ORG/arca-rankup-php.git
+cd arca-rankup-php
+
+<span class="cm"># Установка зависимостей</span>
+composer install --no-dev --optimize-autoloader
+
+<span class="cm"># Создать .env</span>
+cp .env.example .env
+nano .env
+
+<span class="cm"># Создать базу данных</span>
+mysql -u root -p &lt; db/schema.sql
+
+<span class="cm"># Права на папку логов</span>
+mkdir -p logs && chown -R www-data:www-data logs
+
+<span class="cm"># Nginx</span>
+cp nginx.conf.example /etc/nginx/sites-available/arca-gateway
+ln -s /etc/nginx/sites-available/arca-gateway /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx</code></pre>
+</section>
+
+<!-- ─── DEPLOY DOCKER ──────────────────────────────────────────────────────── -->
+<section class="doc-section" id="deploy-docker">
+  <div class="section-eyebrow">Деплой</div>
+  <h2>Docker (опционально)</h2>
+  <p>Если хотите запустить в контейнере, добавьте <code>Dockerfile</code> на основе <code>php:8.1-fpm-alpine</code>:</p>
+  <pre><div class="pre-header"><span>Dockerfile</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>FROM php:8.1-fpm-alpine
+
+RUN apk add --no-cache curl \
+ && docker-php-ext-install pdo_mysql \
+ && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+WORKDIR /app
+COPY composer*.json ./
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+COPY . .
+RUN mkdir -p logs && chown -R www-data:www-data logs
+
+USER www-data
+EXPOSE 9000
+CMD ["php-fpm"]</code></pre>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ️</span>
+    <div class="callout-body">
+      <strong>PHP-FPM + Nginx в Docker</strong>
+      <p>PHP-FPM не принимает HTTP напрямую — нужен отдельный Nginx контейнер в <code>docker-compose.yml</code>. FastCGI соединяется по сокету или <code>fastcgi_pass app:9000</code>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── API REF ────────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="api-ref">
+  <div class="section-eyebrow">Справочник</div>
+  <h2>API Reference</h2>
+  <h3>ArCa — paymentState значения</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>paymentState</th><th>Описание</th></tr></thead>
+      <tbody>
+        <tr><td><code>CREATED</code></td><td>Заказ создан, покупатель ещё не вводил карту</td></tr>
+        <tr><td><code>APPROVED</code></td><td>PreAuth: авторизован, ещё не списан</td></tr>
+        <tr><td><code>DEPOSITED</code></td><td>Деньги списаны (Sale mode или после deposit.do)</td></tr>
+        <tr><td><code>DECLINED</code></td><td>Отклонён банком/покупателем</td></tr>
+        <tr><td><code>REVERSED</code></td><td>Отменён через reverse.do</td></tr>
+        <tr><td><code>REFUNDED</code></td><td>Возвращён через refund.do</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Shopify — transaction kinds</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>kind</th><th>status</th><th>Когда</th></tr></thead>
+      <tbody>
+        <tr><td><code>authorization</code></td><td><code>success</code></td><td>ArCa APPROVED (PreAuth)</td></tr>
+        <tr><td><code>sale</code></td><td><code>success</code></td><td>ArCa DEPOSITED (Sale mode)</td></tr>
+        <tr><td><code>capture</code></td><td><code>success</code></td><td>Явный capture (будущее расширение)</td></tr>
+        <tr><td><code>authorization</code></td><td><code>failure</code></td><td>ArCa DECLINED</td></tr>
+        <tr><td><code>void</code></td><td><code>success</code></td><td>reverse.do выполнен</td></tr>
+        <tr><td><code>refund</code></td><td><code>success</code></td><td>refund.do выполнен</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── DB SCHEMA ──────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="db-schema">
+  <div class="section-eyebrow"><span class="badge b-db">Database</span></div>
+  <h2>Схема базы данных</h2>
+
+  <h3>Таблица <code>orders</code></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Колонка</th><th>Тип</th><th>Описание</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>INT UNSIGNED PK</td><td>Внутренний ID (передаётся как <code>orderNumber</code> в ArCa)</td></tr>
+        <tr><td><code>status</code></td><td>TINYINT</td><td>0=pending 1=registered 2=authorized 3=captured 4=expired</td></tr>
+        <tr><td><code>orderid</code></td><td>VARCHAR(64) UNIQUE</td><td>Shopify Order ID</td></tr>
+        <tr><td><code>email</code></td><td>VARCHAR(255)</td><td>Email покупателя</td></tr>
+        <tr><td><code>price</code></td><td>DECIMAL(12,2)</td><td>Сумма в AMD</td></tr>
+        <tr><td><code>status_url</code></td><td>TEXT</td><td>URL для редиректа после оплаты</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Таблица <code>transaction</code></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Колонка</th><th>Тип</th><th>Описание</th></tr></thead>
+      <tbody>
+        <tr><td><code>externaltrid</code></td><td>VARCHAR(64)</td><td>UUID от ArCa (orderId)</td></tr>
+        <tr><td><code>trstatus</code></td><td>VARCHAR(32)</td><td>pending | authorized | captured | declined | canceled | deleted</td></tr>
+        <tr><td><code>program</code></td><td>TINYINT</td><td>0=init 1=registered 2=authorized 3=captured 4=voided</td></tr>
+        <tr><td><code>redirect</code></td><td>TEXT</td><td>formUrl от ArCa</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Таблица <code>transaction_details</code></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Колонка</th><th>Описание</th></tr></thead>
+      <tbody>
+        <tr><td><code>pan</code></td><td>Маскированный PAN карты (6*4)</td></tr>
+        <tr><td><code>cardholderName</code></td><td>Имя держателя</td></tr>
+        <tr><td><code>approvalCode</code></td><td>Код авторизации банка</td></tr>
+        <tr><td><code>cardBrand</code></td><td>VISA / Mastercard / Arca</td></tr>
+        <tr><td><code>ip</code></td><td>IP покупателя</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Таблица <code>process</code></h3>
+  <p>Очередь для <code>Autocapture</code> — задания, где первый <code>deposit.do</code> не прошёл.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Колонка</th><th>Описание</th></tr></thead>
+      <tbody>
+        <tr><td><code>externaltrid</code></td><td>UUID ArCa транзакции</td></tr>
+        <tr><td><code>shopify_id</code></td><td>Shopify Order ID</td></tr>
+        <tr><td><code>amount</code></td><td>Сумма в копейках (AMD × 100)</td></tr>
+        <tr><td><code>retry</code></td><td>Счётчик попыток (max 10)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── CHECKLIST ──────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="checklist">
+  <div class="section-eyebrow">Финал</div>
+  <h2>Чек-лист перед запуском</h2>
+
+  <h3>Сервер</h3>
+  <ul class="checklist">
+    <li><span class="chk">☐</span> PHP 8.1+ установлен с расширениями: <code>pdo_mysql</code>, <code>curl</code>, <code>mbstring</code></li>
+    <li><span class="chk">☐</span> <code>composer install --no-dev</code> выполнен</li>
+    <li><span class="chk">☐</span> <code>.env</code> создан и заполнен (chmod 600)</li>
+    <li><span class="chk">☐</span> <code>db/schema.sql</code> выполнен на MySQL</li>
+    <li><span class="chk">☐</span> Папка <code>logs/</code> создана, права <code>www-data</code></li>
+  </ul>
+
+  <h3>Nginx</h3>
+  <ul class="checklist">
+    <li><span class="chk">☐</span> <code>root</code> указывает на <code>public/</code></li>
+    <li><span class="chk">☐</span> <code>try_files ... /index.php</code> настроен</li>
+    <li><span class="chk">☐</span> <code>fastcgi_pass unix:/run/php/php8.1-fpm.sock</code></li>
+    <li><span class="chk">☐</span> Доступ к <code>/src/</code>, <code>/cron/</code>, <code>/.env</code> заблокирован</li>
+    <li><span class="chk">☐</span> SSL сертификат получен через Certbot</li>
+  </ul>
+
+  <h3>Cron</h3>
+  <ul class="checklist">
+    <li><span class="chk">☐</span> <code>crontab -e</code> добавлены autopurge + autocapture</li>
+    <li><span class="chk">☐</span> Ручной запуск <code>php cron/autopurge.php</code> работает без ошибок</li>
+    <li><span class="chk">☐</span> Логи пишутся в <code>/var/log/arca-cron.log</code></li>
+  </ul>
+
+  <h3>Shopify</h3>
+  <ul class="checklist">
+    <li><span class="chk">☐</span> Custom App создан, <code>shpat_...</code> токен скопирован</li>
+    <li><span class="chk">☐</span> Webhook <code>orders/cancelled</code> → <code>/webhook/cancel</code></li>
+    <li><span class="chk">☐</span> Webhook <code>refunds/create</code> → <code>/webhook/cancel</code></li>
+    <li><span class="chk">☐</span> Webhook <code>orders/paid</code> → <code>/webhook/capture</code></li>
+  </ul>
+
+  <h3>ArCa</h3>
+  <ul class="checklist">
+    <li><span class="chk">☐</span> Тестовый аккаунт получен от банка</li>
+    <li><span class="chk">☐</span> <code>ARCA_BASE_URL</code> указывает на тестовый сервер</li>
+    <li><span class="chk">☐</span> Тестовый платёж прошёл, статус виден в Dashboard</li>
+    <li><span class="chk">☐</span> Замена на боевые credentials перед запуском в продакшн</li>
+  </ul>
+</section>
+
+</main><!-- /content -->
+
+<script>
+const links    = document.querySelectorAll('.nav-link');
+const sections = document.querySelectorAll('.doc-section');
+
+function onScroll() {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
+  links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current));
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+links.forEach(l => {
+  l.addEventListener('click', e => {
+    const href = l.getAttribute('href');
+    if (href?.startsWith('#')) {
+      e.preventDefault();
+      document.querySelector(href)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+function copyCode(btn) {
+  const text = btn.closest('pre').querySelector('code').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+</script>
+</body>
+</html>
