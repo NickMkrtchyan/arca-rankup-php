@@ -1,0 +1,46 @@
+# Local development overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+# Or:    bash start.sh --local
+
+services:
+
+  app:
+    env_file: .env.local
+    environment:
+      APP_ENV: development
+    volumes:
+      # Mount source dirs individually — vendor stays from image build
+      - ./src:/var/www/html/src
+      - ./templates:/var/www/html/templates
+      - ./public:/var/www/html/public
+      - ./cron:/var/www/html/cron
+      - ./logs:/var/www/html/logs
+
+  db:
+    env_file: .env.local
+    environment:
+      MYSQL_ROOT_PASSWORD: local_root_password
+      MYSQL_DATABASE:      arca_gateway_local
+      MYSQL_USER:          arca
+      MYSQL_PASSWORD:      local_password
+    # Expose MySQL port directly for TablePlus / DBeaver / phpMyAdmin
+    ports:
+      - "127.0.0.1:3307:3306"
+
+  # phpMyAdmin — доступен на http://localhost:8080
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: arca-php-pma
+    restart: unless-stopped
+    environment:
+      PMA_HOST:     db
+      PMA_PORT:     3306
+      PMA_USER:     root
+      PMA_PASSWORD: local_root_password
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - arca-php-net

@@ -4,7 +4,8 @@
 #  Запускает app (Apache+PHP) + MySQL через docker compose.
 #
 #  Usage:
-#    bash start.sh           # первый запуск / перезапуск
+#    bash start.sh           # продакшн: первый запуск / перезапуск
+#    bash start.sh --local   # локалка: .env.local + phpMyAdmin, без домена
 #    bash start.sh --update  # git pull + пересборка образа
 #    bash start.sh --stop    # остановить все контейнеры
 #    bash start.sh --logs    # следить за логами app
@@ -23,6 +24,19 @@ die()     { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
+
+# ─── Режим (local / production) ──────────────────────────────────────────────
+LOCAL=false
+[[ "${1:-}" == "--local" ]] && LOCAL=true
+
+DC_FILES="-f docker-compose.yml"
+ENV_FILE=".env"
+ENV_EXAMPLE=".env.example"
+if $LOCAL; then
+  DC_FILES="-f docker-compose.yml -f docker-compose.local.yml"
+  ENV_FILE=".env.local"
+  ENV_EXAMPLE=".env.local.example"
+fi
 
 # ─── Команды ─────────────────────────────────────────────────────────────────
 case "${1:-}" in
@@ -62,76 +76,106 @@ case "${1:-}" in
 
 esac
 
-# ─── Первый запуск ────────────────────────────────────────────────────────────
-echo ""
-echo -e "${BOLD}${CYAN}  ArCa Gateway PHP — Docker Setup${NC}"
-echo -e "  ─────────────────────────────────"
-echo ""
+# ─── Локальный режим ─────────────────────────────────────────────────────────
+if $LOCAL; then
+  echo ""
+  echo -e "${BOLD}${CYAN}  ArCa Gateway PHP — Local Dev${NC}"
+  echo -e "  ${YELLOW}Режим: localhost · phpMyAdmin · тестовый ArCa · без домена${NC}"
+  echo -e "  ─────────────────────────────────────────────────────────"
+  echo ""
+else
+  echo ""
+  echo -e "${BOLD}${CYAN}  ArCa Gateway PHP — Docker Setup${NC}"
+  echo -e "  ─────────────────────────────────"
+  echo ""
+fi
 
 # Проверка Docker
 command -v docker &>/dev/null || die "Docker not found. Install Docker first."
 docker compose version &>/dev/null || die "docker compose not found."
 
-# Проверка .env
-if [[ ! -f .env ]]; then
-  warn ".env not found — creating from .env.example..."
-  [[ -f .env.example ]] || die ".env.example not found either. Check repository."
-  cp .env.example .env
+# Helpers для ввода
+read_val() {
+  local var="$1" prompt="$2" default="${3:-}" target_file="${4:-.env}"
+  local hint=""; [[ -n "$default" ]] && hint=" [${default}]"
+  read -rp "$(echo -e "  ${BOLD}${prompt}${hint}: ${NC}")" val
+  [[ -z "$val" && -n "$default" ]] && val="$default"
+  sed -i "s|^${var}=.*|${var}=${val}|" "$target_file"
+}
+read_secret() {
+  local var="$1" prompt="$2" target_file="${3:-.env}"
+  read -rsp "$(echo -e "  ${BOLD}${prompt}: ${NC}")" val; echo ""
+  sed -i "s|^${var}=.*|${var}=${val}|" "$target_file"
+}
 
-  # Обязательные поля
+# ─── Создать .env / .env.local если не существует ────────────────────────────
+if [[ ! -f "$ENV_FILE" ]]; then
+  warn "${ENV_FILE} not found — creating from ${ENV_EXAMPLE}..."
+  [[ -f "$ENV_EXAMPLE" ]] || die "${ENV_EXAMPLE} not found. Check repository."
+  cp "$ENV_EXAMPLE" "$ENV_FILE"
+
   echo ""
   echo -e "  ${BOLD}Fill in required settings:${NC}"
   echo ""
 
-  read_val() {
-    local var="$1" prompt="$2" default="${3:-}"
-    local hint=""; [[ -n "$default" ]] && hint=" [${default}]"
-    read -rp "$(echo -e "  ${BOLD}${prompt}${hint}: ${NC}")" val
-    [[ -z "$val" && -n "$default" ]] && val="$default"
-    sed -i "s|^${var}=.*|${var}=${val}|" .env
-  }
-  read_secret() {
-    local var="$1" prompt="$2"
-    read -rsp "$(echo -e "  ${BOLD}${prompt}: ${NC}")" val; echo ""
-    sed -i "s|^${var}=.*|${var}=${val}|" .env
-  }
+  if $LOCAL; then
+    # ── Локальный режим: минимум вопросов ──────────────────────────────────
+    info "Local mode: APP_URL = http://localhost:3001, ArCa = TEST endpoint"
+    read_val APP_PORT "Container port" "3001" "$ENV_FILE"
+    sed -i "s|^APP_URL=.*|APP_URL=http://localhost:3001|" "$ENV_FILE"
+    sed -i "s|^APP_ENV=.*|APP_ENV=development|"           "$ENV_FILE"
+    sed -i "s|^ARCA_BASE_URL=.*|ARCA_BASE_URL=https://ipaytest.arca.am:8445/payment/rest|" "$ENV_FILE"
 
-  read_val    APP_URL            "Public URL (e.g. https://checkout.your-domain.com)" ""
-  read_val    APP_PORT           "Local port for this container"                      "3001"
-  read_val    DB_NAME            "Database name"                                      "arca_gateway_php"
-  read_val    DB_USER            "MySQL user"                                         "arca"
-  read_secret DB_PASSWORD        "MySQL password"
-  read_secret DB_ROOT_PASSWORD   "MySQL ROOT password"
-  read_val    SHOPIFY_STORE      "Shopify store (e.g. your-store.myshopify.com)"      ""
-  read_secret SHOPIFY_ACCESS_TOKEN  "Shopify Access Token (shpat_...)"
-  read_secret SHOPIFY_WEBHOOK_SECRET "Shopify Webhook Secret"
-  read_val    ARCA_BASE_URL      "ArCa base URL" "https://ipay.arca.am/payment/rest"
-  read_val    ARCA_USERNAME      "ArCa username" ""
-  read_secret ARCA_PASSWORD      "ArCa password"
+    echo ""
+    info "Shopify & ArCa (опционально — можно оставить placeholder для UI-тестирования):"
+    read_val    SHOPIFY_STORE          "Shopify store [Enter для пропуска]"  "your-store.myshopify.com" "$ENV_FILE"
+    read_secret SHOPIFY_ACCESS_TOKEN   "Shopify Access Token"                "$ENV_FILE"
+    read_secret SHOPIFY_WEBHOOK_SECRET "Shopify Webhook Secret"              "$ENV_FILE"
+    read_val    ARCA_USERNAME          "ArCa test username [Enter для пропуска]" "test_user" "$ENV_FILE"
+    read_secret ARCA_PASSWORD          "ArCa test password"                  "$ENV_FILE"
+  else
+    # ── Продакшн: все обязательные поля ────────────────────────────────────
+    read_val    APP_URL                "Public URL (https://checkout.your-domain.com)" "" "$ENV_FILE"
+    read_val    APP_PORT               "Local port for this container"                 "3001" "$ENV_FILE"
+    read_val    DB_NAME                "Database name"                                 "arca_gateway_php" "$ENV_FILE"
+    read_val    DB_USER                "MySQL user"                                    "arca" "$ENV_FILE"
+    read_secret DB_PASSWORD            "MySQL password"                                "$ENV_FILE"
+    read_secret DB_ROOT_PASSWORD       "MySQL ROOT password"                           "$ENV_FILE"
+    read_val    SHOPIFY_STORE          "Shopify store (e.g. your-store.myshopify.com)" "" "$ENV_FILE"
+    read_secret SHOPIFY_ACCESS_TOKEN   "Shopify Access Token (shpat_...)"              "$ENV_FILE"
+    read_secret SHOPIFY_WEBHOOK_SECRET "Shopify Webhook Secret"                        "$ENV_FILE"
+    read_val    ARCA_BASE_URL          "ArCa base URL" "https://ipay.arca.am/payment/rest" "$ENV_FILE"
+    read_val    ARCA_USERNAME          "ArCa username" "" "$ENV_FILE"
+    read_secret ARCA_PASSWORD          "ArCa password" "$ENV_FILE"
 
-  echo ""
-  echo -e "  Payment mode:"
-  echo -e "  ${GREEN}[1]${NC} PreAuth (recommended)"
-  echo -e "  ${YELLOW}[2]${NC} Sale (charge immediately)"
-  read -rp "$(echo -e "  ${BOLD}Mode [1/2]: ${NC}")" pm
-  [[ "$pm" == "2" ]] \
-    && sed -i 's/^ARCA_AUTH_MODE=.*/ARCA_AUTH_MODE=0/' .env \
-    || sed -i 's/^ARCA_AUTH_MODE=.*/ARCA_AUTH_MODE=1/' .env
+    echo ""
+    echo -e "  Payment mode:"
+    echo -e "  ${GREEN}[1]${NC} PreAuth (recommended)"
+    echo -e "  ${YELLOW}[2]${NC} Sale (charge immediately)"
+    read -rp "$(echo -e "  ${BOLD}Mode [1/2]: ${NC}")" pm
+    [[ "$pm" == "2" ]] \
+      && sed -i 's/^ARCA_AUTH_MODE=.*/ARCA_AUTH_MODE=0/' "$ENV_FILE" \
+      || sed -i 's/^ARCA_AUTH_MODE=.*/ARCA_AUTH_MODE=1/' "$ENV_FILE"
+  fi
 
-  chmod 600 .env
-  success ".env configured."
+  chmod 600 "$ENV_FILE"
+  success "${ENV_FILE} configured."
 fi
 
 # Папка логов
 mkdir -p logs
 
 # ─── Запуск ───────────────────────────────────────────────────────────────────
-info "Building and starting containers..."
-docker compose up -d --build
+if $LOCAL; then
+  info "Starting LOCAL environment (app + db + phpMyAdmin)..."
+else
+  info "Building and starting containers..."
+fi
+docker compose $DC_FILES up -d --build
 
 # ─── Health check ─────────────────────────────────────────────────────────────
 info "Waiting for application to be ready..."
-PORT=$(grep -E '^APP_PORT=' .env | cut -d= -f2 | tr -d '"' | tr -d "'" || echo "3001")
+PORT=$(grep -E '^APP_PORT=' "$ENV_FILE" | cut -d= -f2 | tr -d '"' | tr -d "'" || echo "3001")
 attempts=0
 until curl -sf "http://localhost:${PORT}/health" 2>/dev/null | grep -q "ok"; do
   attempts=$((attempts + 1))
@@ -146,26 +190,41 @@ done
 echo ""
 
 # ─── Summary ─────────────────────────────────────────────────────────────────
-APP_URL=$(grep -E '^APP_URL=' .env | cut -d= -f2 | tr -d '"' | tr -d "'" || echo "")
+APP_URL_VAL=$(grep -E '^APP_URL=' "$ENV_FILE" | cut -d= -f2 | tr -d '"' | tr -d "'" || echo "")
 
-success "ArCa Gateway PHP is running!"
-echo ""
-echo -e "  ${BOLD}Local:${NC}      http://localhost:${PORT}"
-[[ -n "$APP_URL" ]] && echo -e "  ${BOLD}Public:${NC}     ${APP_URL}"
-echo -e "  ${BOLD}Dashboard:${NC}  http://localhost:${PORT}/"
-echo -e "  ${BOLD}Health:${NC}     http://localhost:${PORT}/health"
-echo -e "  ${BOLD}Logs dir:${NC}   ${SCRIPT_DIR}/logs/"
+if $LOCAL; then
+  success "ArCa Gateway PHP — Local Dev is running!"
+  echo ""
+  echo -e "  ${BOLD}App:${NC}          http://localhost:${PORT}"
+  echo -e "  ${BOLD}Dashboard:${NC}    http://localhost:${PORT}/"
+  echo -e "  ${BOLD}Health:${NC}       http://localhost:${PORT}/health"
+  echo -e "  ${BOLD}phpMyAdmin:${NC}   http://localhost:8080"
+  echo -e "  ${BOLD}MySQL direct:${NC} localhost:3307  (user: arca / root)"
+  echo -e "  ${BOLD}Logs dir:${NC}     ${SCRIPT_DIR}/logs/"
+else
+  success "ArCa Gateway PHP is running!"
+  echo ""
+  echo -e "  ${BOLD}Local:${NC}      http://localhost:${PORT}"
+  [[ -n "$APP_URL_VAL" ]] && echo -e "  ${BOLD}Public:${NC}     ${APP_URL_VAL}"
+  echo -e "  ${BOLD}Dashboard:${NC}  http://localhost:${PORT}/"
+  echo -e "  ${BOLD}Health:${NC}     http://localhost:${PORT}/health"
+  echo -e "  ${BOLD}Logs dir:${NC}   ${SCRIPT_DIR}/logs/"
+fi
 echo ""
 echo -e "  ${BOLD}Commands:${NC}"
 echo -e "  ${CYAN}bash start.sh --logs${NC}    — live logs"
 echo -e "  ${CYAN}bash start.sh --status${NC}  — container status"
-echo -e "  ${CYAN}bash start.sh --update${NC}  — git pull + rebuild"
+if ! $LOCAL; then
+  echo -e "  ${CYAN}bash start.sh --update${NC}  — git pull + rebuild"
+fi
 echo -e "  ${CYAN}bash start.sh --stop${NC}    — stop everything"
 echo -e "  ${CYAN}docker compose exec db mysql -u root -p${NC}  — MySQL shell"
 echo ""
 
-# ─── Cron reminder ───────────────────────────────────────────────────────────
-echo -e "  ${YELLOW}[CRON]${NC} Don't forget to add cron jobs on the host:"
-echo -e "  ${CYAN}*/5 * * * * docker exec arca-php-app php /var/www/html/cron/autopurge.php >> /var/log/arca-cron.log 2>&1${NC}"
-echo -e "  ${CYAN}*/2 * * * * docker exec arca-php-app php /var/www/html/cron/autocapture.php >> /var/log/arca-cron.log 2>&1${NC}"
-echo ""
+# ─── Cron reminder (только в продакшн) ────────────────────────────────────────
+if ! $LOCAL; then
+  echo -e "  ${YELLOW}[CRON]${NC} Don't forget to add cron jobs on the host:"
+  echo -e "  ${CYAN}*/5 * * * * docker exec arca-php-app php /var/www/html/cron/autopurge.php >> /var/log/arca-cron.log 2>&1${NC}"
+  echo -e "  ${CYAN}*/2 * * * * docker exec arca-php-app php /var/www/html/cron/autocapture.php >> /var/log/arca-cron.log 2>&1${NC}"
+  echo ""
+fi
