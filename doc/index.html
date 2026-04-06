@@ -188,6 +188,10 @@ tbody tr:hover td { background: var(--surface2); }
     <a class="nav-link" href="#worker-autocapture"><span class="nav-step">11</span> Autocapture</a>
     <a class="nav-link" href="#cron"><span class="icon">⏰</span> Cron setup</a>
 
+    <div class="nav-group-label">Локальная разработка</div>
+    <a class="nav-link" href="#local-dev"><span class="icon">💻</span> Local Dev (Docker)</a>
+    <a class="nav-link" href="#local-files"><span class="icon">📄</span> Файлы окружения</a>
+
     <div class="nav-group-label">Фронт</div>
     <a class="nav-link" href="#dashboard"><span class="icon">📊</span> Alpine.js Dashboard</a>
     <a class="nav-link" href="#result-page"><span class="icon">✅</span> Страница результата</a>
@@ -742,6 +746,125 @@ $hmac    = $_SERVER[<span class="str">'HTTP_X_SHOPIFY_HMAC_SHA256'</span>] ?? <s
   <p>При <code>success</code> + <code>$statusUrl</code> — автоматический редирект через 8 секунд с обратным отсчётом.</p>
 </section>
 
+<!-- ─── LOCAL DEV ────────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="local-dev">
+  <div class="section-eyebrow"><span class="badge b-alpine">Local</span></div>
+  <h2>Локальная разработка</h2>
+  <p>Полноценная среда запускается одной командой — без домена, SSL и реальных credentials ArCa:</p>
+
+  <pre><div class="pre-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>bash start.sh --local</code></pre>
+
+  <h3>Что поднимается</h3>
+  <div class="arch">
+    <div class="arch-box violet">
+      <div class="a-label">App</div>
+      <div class="a-name">localhost:3001</div>
+      <div class="a-desc">Apache + PHP 8.1, Dashboard, все маршруты</div>
+    </div>
+    <div class="arch-box cyan">
+      <div class="a-label">phpMyAdmin</div>
+      <div class="a-name">localhost:8080</div>
+      <div class="a-desc">Веб-интерфейс для MySQL — авторизация не нужна</div>
+    </div>
+    <div class="arch-box green">
+      <div class="a-label">MySQL direct</div>
+      <div class="a-name">localhost:3307</div>
+      <div class="a-desc">Прямое подключение через TablePlus / DBeaver</div>
+    </div>
+  </div>
+
+  <h3>Отличия от продакшна</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th><code>--local</code></th><th>Продакшн</th></tr></thead>
+      <tbody>
+        <tr><td>Env файл</td><td><code>.env.local</code></td><td><code>.env</code></td></tr>
+        <tr><td>Docker файлы</td><td><code>docker-compose.yml</code> + <code>docker-compose.local.yml</code></td><td><code>docker-compose.yml</code></td></tr>
+        <tr><td>APP_URL</td><td><code>http://localhost:3001</code> (авто)</td><td>ваш домен (обязателен)</td></tr>
+        <tr><td>ArCa endpoint</td><td><code>ipaytest.arca.am</code> (авто)</td><td><code>ipay.arca.am</code></td></tr>
+        <tr><td>Вопросов при запуске</td><td>3–4, все опциональны</td><td>~10, все обязательны</td></tr>
+        <tr><td>phpMyAdmin</td><td>✅ localhost:8080</td><td>❌</td></tr>
+        <tr><td>MySQL expose</td><td>✅ localhost:3307</td><td>❌</td></tr>
+        <tr><td>Source mount</td><td>✅ изменения без rebuild</td><td>❌</td></tr>
+        <tr><td>Cron reminder</td><td>❌ не нужен</td><td>✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="callout-icon">⚡</span>
+    <div class="callout-body">
+      <strong>Live Reload без rebuild</strong>
+      <p>Директории <code>src/</code>, <code>templates/</code>, <code>public/</code>, <code>cron/</code> монтируются напрямую в контейнер через Docker volume. Изменения в <code>.php</code> файлах отражаются мгновенно — Apache обслуживает PHP динамически.</p>
+    </div>
+  </div>
+
+  <h3>Запуск воркеров вручную (локально)</h3>
+  <pre><div class="pre-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code><span class="cm"># Автоочистка зависших заказов</span>
+docker exec arca-php-app php /var/www/html/cron/autopurge.php
+
+<span class="cm"># Повтор неудачных deposit.do</span>
+docker exec arca-php-app php /var/www/html/cron/autocapture.php
+
+<span class="cm"># MySQL shell</span>
+docker compose exec db mysql -u arca -p arca_gateway_local</code></pre>
+
+  <h3>Все sub-команды start.sh</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Команда</th><th>Описание</th></tr></thead>
+      <tbody>
+        <tr><td><code>bash start.sh</code></td><td>Продакшн: первый запуск / перезапуск</td></tr>
+        <tr><td><code>bash start.sh --local</code></td><td>Локалка: phpMyAdmin, без домена, тестовый ArCa</td></tr>
+        <tr><td><code>bash start.sh --update</code></td><td><code>git pull</code> + пересборка образа + health check</td></tr>
+        <tr><td><code>bash start.sh --stop</code></td><td>Остановить все контейнеры</td></tr>
+        <tr><td><code>bash start.sh --logs</code></td><td>Live логи app-контейнера</td></tr>
+        <tr><td><code>bash start.sh --status</code></td><td>Статус контейнеров</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── LOCAL FILES ────────────────────────────────────────────────────────── -->
+<section class="doc-section" id="local-files">
+  <div class="section-eyebrow"><span class="badge b-alpine">Local</span></div>
+  <h2>Файлы локального окружения</h2>
+
+  <h3>.env.local.example → .env.local</h3>
+  <p>Минимальный конфиг для локалки — ArCa test endpoint прописан по умолчанию, домен не нужен:</p>
+  <pre><div class="pre-header"><span>.env.local</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code>APP_ENV=development
+APP_URL=http://localhost:3001
+APP_PORT=3001
+
+DB_HOST=db
+DB_NAME=arca_gateway_local
+DB_USER=arca
+DB_PASSWORD=local_password
+DB_ROOT_PASSWORD=local_root_password
+
+SHOPIFY_STORE=your-store.myshopify.com   <span class="cm"># можно placeholder</span>
+SHOPIFY_ACCESS_TOKEN=shpat_placeholder
+SHOPIFY_WEBHOOK_SECRET=local_webhook_secret
+
+ARCA_USERNAME=your_test_username
+ARCA_PASSWORD=your_test_password
+ARCA_BASE_URL=https://ipaytest.arca.am:8445/payment/rest   <span class="cm"># тест!</span></code></pre>
+
+  <h3>docker-compose.local.yml</h3>
+  <p>Переопределяет <code>docker-compose.yml</code>. Добавляет:</p>
+  <ul>
+    <li>Монтирование исходников (<code>src/</code>, <code>templates/</code>, <code>public/</code>) — live changes без rebuild</li>
+    <li><strong>phpMyAdmin</strong> на <code>localhost:8080</code></li>
+    <li>Expose MySQL на <code>localhost:3307</code> для прямых подключений</li>
+    <li>Простые пароли (hardcoded <code>local_*</code>) — не для продакшна</li>
+  </ul>
+  <pre><div class="pre-header"><span>bash — запуск с override</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><code><span class="cm"># Вручную (если не используете start.sh):</span>
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+
+<span class="cm"># Через start.sh (рекомендуется):</span>
+bash start.sh --local</code></pre>
+</section>
+
 <!-- ─── DEPLOY NGINX ────────────────────────────────────────────────────────── -->
 <section class="doc-section" id="deploy-nginx">
   <div class="section-eyebrow">Деплой</div>
@@ -943,7 +1066,16 @@ CMD ["php-fpm"]</code></pre>
   <div class="section-eyebrow">Финал</div>
   <h2>Чек-лист перед запуском</h2>
 
-  <h3>Сервер</h3>
+  <h3>🖥 Локальная разработка</h3>
+  <ul class="checklist">
+    <li><span class="chk">☐</span> Docker Desktop установлен и запущен</li>
+    <li><span class="chk">☐</span> <code>bash start.sh --local</code> выполнен без ошибок</li>
+    <li><span class="chk">☐</span> Dashboard открывается на <code>http://localhost:3001</code></li>
+    <li><span class="chk">☐</span> phpMyAdmin открывается на <code>http://localhost:8080</code></li>
+    <li><span class="chk">☐</span> <code>/health</code> возвращает <code>{"status":"ok"}</code></li>
+  </ul>
+
+  <h3>🚀 Сервер (продакшн)</h3>
   <ul class="checklist">
     <li><span class="chk">☐</span> PHP 8.1+ установлен с расширениями: <code>pdo_mysql</code>, <code>curl</code>, <code>mbstring</code></li>
     <li><span class="chk">☐</span> <code>composer install --no-dev</code> выполнен</li>
